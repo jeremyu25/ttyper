@@ -1,6 +1,10 @@
 package tui
 
 import (
+	"math/rand/v2"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"charm.land/bubbles/v2/key"
@@ -18,10 +22,12 @@ type typedTimerModel struct {
 	typeTimerKeymap typeTimerKeymap
 	timer           timer.Model
 	userInput       string
+	sentence        string
+	started         bool
 }
 
 func (m typedTimerModel) Init() tea.Cmd {
-	return m.timer.Init()
+	return nil
 }
 
 func (m typedTimerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -41,6 +47,13 @@ func (m typedTimerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 
 	case tea.KeyPressMsg:
+		if !m.started {
+			if msg.Text != "" {
+				m.userInput += msg.Text
+				m.started = true
+				return m, m.timer.Init()
+			}
+		}
 		switch {
 		case key.Matches(msg, m.typeTimerKeymap.back):
 			m.timer.Timeout = time.Second * 30
@@ -56,7 +69,7 @@ func (m typedTimerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if msg.Text != "" {
 			m.userInput += msg.Text
-			if m.userInput == sentence {
+			if m.userInput == m.sentence {
 				return m, signalResultsMsg(m.timer.Timeout)
 			}
 		}
@@ -66,9 +79,49 @@ func (m typedTimerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m typedTimerModel) View() tea.View {
 	s := m.timer.View()
-	s += "\n" + sentence
+	s += "\n" + m.sentence
 	s += "\n" + m.userInput
 	typedTimerView := tea.NewView(s)
 	typedTimerView.AltScreen = true
 	return typedTimerView
+}
+
+func CreateNewTimedTypeModel(timerDuration time.Duration) tea.Model {
+	return typedTimerModel{
+		timer: timer.New(timerDuration, timer.WithInterval(time.Millisecond)),
+		typeTimerKeymap: typeTimerKeymap{
+			pause: key.NewBinding(
+				key.WithKeys("esc"),
+			),
+			back: key.NewBinding(
+				key.WithKeys("shift+tab"),
+			),
+			delete: key.NewBinding(
+				key.WithKeys("backspace"),
+			),
+		},
+		sentence: buildsentence(),
+		started:  false,
+	}
+}
+
+func buildsentence() string {
+	path := filepath.Join(".", "google-10000-english-usa-no-swears-long.txt")
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		panic(err)
+	}
+	dat, err := os.ReadFile(absPath)
+	if err != nil {
+		panic(err)
+	}
+	datString := strings.TrimSpace(string(dat))
+	stringSlice := strings.Fields(datString)
+	sentenceSlice := make([]string, 0)
+	for _ = range 10 {
+		randIndex := rand.IntN(len(stringSlice) + 1)
+		sentenceSlice = append(sentenceSlice, stringSlice[randIndex])
+	}
+	sentence := strings.Join(sentenceSlice, " ")
+	return sentence
 }

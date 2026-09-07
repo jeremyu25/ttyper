@@ -4,11 +4,8 @@ import (
 	"time"
 
 	"charm.land/bubbles/v2/key"
-	"charm.land/bubbles/v2/timer"
 	tea "charm.land/bubbletea/v2"
 )
-
-const sentence = "the quick brown fox jumps over the fence"
 
 type routerModel struct {
 	globalKeymap globalKeymap
@@ -57,20 +54,7 @@ func (m routerModel) Init() tea.Cmd {
 func (m routerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case timedTypeTransitionMsg:
-		m.currentState = typedTimerModel{
-			timer: timer.New(msg.timerDuration, timer.WithInterval(time.Millisecond)),
-			typeTimerKeymap: typeTimerKeymap{
-				pause: key.NewBinding(
-					key.WithKeys("esc"),
-				),
-				back: key.NewBinding(
-					key.WithKeys("shift+tab"),
-				),
-				delete: key.NewBinding(
-					key.WithKeys("backspace"),
-				),
-			},
-		}
+		m.currentState = CreateNewTimedTypeModel(msg.timerDuration)
 		return m, m.currentState.Init()
 
 	case menuTransitionMsg:
