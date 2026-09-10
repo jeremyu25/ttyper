@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	titleStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("99")).MarginRight(1)
-	itemStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
-	boldItemStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("212")).Bold(true)
+	titleStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#20c9aa"))
+	modeStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#256bf7"))
+	boldmodeStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#256bf7")).Bold(true)
 	modes         = []string{
 		"Timed Typer",
 		"Pied Piper",
@@ -66,12 +66,18 @@ func (m menuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m menuModel) View() tea.View {
 	var menuStringBuilder strings.Builder
-	menuStringBuilder.WriteString(titleStyle.Render("Welcome to TTyper! Select a mode below to begin:"))
+	menuStringBuilder.WriteString(titleStyle.Render(`  ____________
+ /_  __/_  __/_  ______  ___  _____
+  / /   / / / / / / __ \/ _ \/ ___/
+ / /   / / / /_/ / /_/ /  __/ /
+/_/   /_/  \__, / .___/\___/_/
+          /____/_/                 `))
+	menuStringBuilder.WriteString(titleStyle.Render("\nWelcome to TTyper! Select a mode below to begin:"))
 	for i, mode := range modes {
 		if m.cursor == i {
-			menuStringBuilder.WriteString(boldItemStyle.Render(fmt.Sprintf("\n> %v", mode)))
+			menuStringBuilder.WriteString(boldmodeStyle.Render(fmt.Sprintf("\n> %v", mode)))
 		} else {
-			menuStringBuilder.WriteString(itemStyle.Render(fmt.Sprintf("\n  %v", mode)))
+			menuStringBuilder.WriteString(modeStyle.Render(fmt.Sprintf("\n  %v", mode)))
 		}
 
 	}
