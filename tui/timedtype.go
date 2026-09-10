@@ -10,6 +10,12 @@ import (
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/timer"
 	tea "charm.land/bubbletea/v2"
+	lipgloss "charm.land/lipgloss/v2"
+)
+
+var (
+	sentenceStyle = lipgloss.NewStyle().
+		Bold(true)
 )
 
 type typeTimerKeymap struct {
@@ -81,6 +87,7 @@ func (m typedTimerModel) View() tea.View {
 	s := m.timer.View()
 	s += "\n" + m.sentence
 	s += "\n" + m.userInput
+	// s = sentenceStyle.Render(s)
 	typedTimerView := tea.NewView(s)
 	typedTimerView.AltScreen = true
 	return typedTimerView

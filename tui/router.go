@@ -102,14 +102,7 @@ func (m routerModel) View() tea.View {
 
 func CreateNewRouterModel() tea.Model {
 	return routerModel{
-		currentState: menuModel{
-			menuKeymap: menuKeymap{
-				start: key.NewBinding(
-					key.WithKeys("enter", "space"),
-					key.WithHelp("enter/space", "begin"),
-				),
-			},
-		},
+		currentState: NewMenuModel(),
 		globalKeymap: globalKeymap{
 			quit: key.NewBinding(
 				key.WithKeys("ctrl+c"),
