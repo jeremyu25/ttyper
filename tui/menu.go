@@ -10,6 +10,10 @@ import (
 	"charm.land/lipgloss/v2"
 )
 
+const (
+	timeAttackSeconds = time.Second * 60
+)
+
 var (
 	titleStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#20c9aa"))
 	modeStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#256bf7"))
@@ -41,7 +45,7 @@ func (m menuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.menuKeymap.start):
-			return m, signalStartTimedTyper(time.Second * 30)
+			return m, signalStartTimeAttack(timeAttackSeconds)
 		case key.Matches(msg, m.menuKeymap.down):
 			if m.cursor >= len(modes)-1 {
 				return m, nil

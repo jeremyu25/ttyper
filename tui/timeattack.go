@@ -24,7 +24,7 @@ type typeTimerKeymap struct {
 	delete key.Binding
 }
 
-type typedTimerModel struct {
+type timeAttackModel struct {
 	typeTimerKeymap typeTimerKeymap
 	timer           timer.Model
 	userInput       string
@@ -32,11 +32,11 @@ type typedTimerModel struct {
 	started         bool
 }
 
-func (m typedTimerModel) Init() tea.Cmd {
+func (m timeAttackModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m typedTimerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m timeAttackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case timer.StartStopMsg:
@@ -83,18 +83,18 @@ func (m typedTimerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m typedTimerModel) View() tea.View {
+func (m timeAttackModel) View() tea.View {
 	s := m.timer.View()
 	s += "\n" + m.sentence
 	s += "\n" + m.userInput
 	// s = sentenceStyle.Render(s)
-	typedTimerView := tea.NewView(s)
-	typedTimerView.AltScreen = true
-	return typedTimerView
+	timeAttackView := tea.NewView(s)
+	timeAttackView.AltScreen = true
+	return timeAttackView
 }
 
-func CreateNewTimedTypeModel(timerDuration time.Duration) tea.Model {
-	return typedTimerModel{
+func CreateNewTimeAttackModel(timerDuration time.Duration) tea.Model {
+	return timeAttackModel{
 		timer: timer.New(timerDuration, timer.WithInterval(time.Millisecond)),
 		typeTimerKeymap: typeTimerKeymap{
 			pause: key.NewBinding(
@@ -113,7 +113,7 @@ func CreateNewTimedTypeModel(timerDuration time.Duration) tea.Model {
 }
 
 func buildsentence() string {
-	path := filepath.Join(".", "google-10000-english-usa-no-swears-long.txt")
+	path := filepath.Join("./wordbanks", "google-10000-english-usa-no-swears.txt")
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		panic(err)

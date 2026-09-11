@@ -16,7 +16,7 @@ type globalKeymap struct {
 	quit key.Binding
 }
 
-type timedTypeTransitionMsg struct {
+type timeAttackTransitionMsg struct {
 	timerDuration time.Duration
 }
 
@@ -32,9 +32,9 @@ func signalMenuMsg() tea.Cmd {
 	}
 }
 
-func signalStartTimedTyper(timerDuration time.Duration) tea.Cmd {
+func signalStartTimeAttack(timerDuration time.Duration) tea.Cmd {
 	return func() tea.Msg {
-		return timedTypeTransitionMsg{
+		return timeAttackTransitionMsg{
 			timerDuration: timerDuration,
 		}
 	}
@@ -53,8 +53,8 @@ func (m routerModel) Init() tea.Cmd {
 
 func (m routerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case timedTypeTransitionMsg:
-		m.currentState = CreateNewTimedTypeModel(msg.timerDuration)
+	case timeAttackTransitionMsg:
+		m.currentState = CreateNewTimeAttackModel(msg.timerDuration)
 		return m, m.currentState.Init()
 
 	case menuTransitionMsg:
