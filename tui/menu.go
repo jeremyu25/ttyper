@@ -43,7 +43,7 @@ func (m menuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.menuKeymap.start):
 			return m, signalStartTimedTyper(time.Second * 30)
 		case key.Matches(msg, m.menuKeymap.down):
-			if m.cursor >= len(modes) {
+			if m.cursor >= len(modes)-1 {
 				return m, nil
 			} else {
 				m.cursor++
@@ -66,7 +66,8 @@ func (m menuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m menuModel) View() tea.View {
 	var menuStringBuilder strings.Builder
-	menuStringBuilder.WriteString(titleStyle.Render(`  ____________
+	menuStringBuilder.WriteString(titleStyle.Render(`
+  ____________
  /_  __/_  __/_  ______  ___  _____
   / /   / / / / / / __ \/ _ \/ ___/
  / /   / / / /_/ / /_/ /  __/ /
