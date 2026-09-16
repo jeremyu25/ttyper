@@ -73,20 +73,7 @@ func (m routerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.currentState.Init()
 
 	case menuTransitionMsg:
-		m.currentState = menuModel{
-			menuKeymap: menuKeymap{
-				start: key.NewBinding(
-					key.WithKeys("enter", "space"),
-					key.WithHelp("enter/space", "begin"),
-				),
-			},
-			globalKeymap: globalKeymap{
-				quit: key.NewBinding(
-					key.WithKeys("ctrl+c"),
-					key.WithHelp("q", "quit"),
-				),
-			},
-		}
+		m.currentState = NewMenuModel()
 		return m, m.currentState.Init()
 
 	case resultsTransitionMsg:
