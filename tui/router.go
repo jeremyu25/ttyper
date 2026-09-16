@@ -43,7 +43,7 @@ func signalStartTimeAttack(timerDuration time.Duration) tea.Cmd {
 		}
 	}
 }
-func signalResultsMsg(m *timeAttackModel) tea.Cmd {
+func signalResultsMsg(m *typingEngine) tea.Cmd {
 	correctWordCount, wrongWordCount := 0, 0
 	for _, word := range m.finishedWordSlice {
 		if word.isCorrect {
