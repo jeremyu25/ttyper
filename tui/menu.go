@@ -14,13 +14,22 @@ const (
 	timeAttackSeconds = time.Second * 60
 )
 
+type modeDescriptor struct {
+	modeName    string
+	description string
+}
+
 var (
 	titleStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#20c9aa"))
 	modeStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#256bf7"))
 	boldmodeStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#256bf7")).Bold(true)
-	modes         = []string{
-		"Timed Typer",
-		"Pied Piper",
+	modes         = []modeDescriptor{
+		{
+			modeName:    "Timed Attack",
+			description: "Type out as many words as you can within a minute!"},
+		{
+			modeName:    "Endless",
+			description: "Type out as many words as you can until you get bored."},
 	}
 )
 
@@ -80,9 +89,9 @@ func (m menuModel) View() tea.View {
 	menuStringBuilder.WriteString(titleStyle.Render("\nWelcome to TTyper! Select a mode below to begin:"))
 	for i, mode := range modes {
 		if m.cursor == i {
-			menuStringBuilder.WriteString(boldmodeStyle.Render(fmt.Sprintf("\n> %v", mode)))
+			menuStringBuilder.WriteString(boldmodeStyle.Render(fmt.Sprintf("\n> %v: %v", mode.modeName, mode.description)))
 		} else {
-			menuStringBuilder.WriteString(modeStyle.Render(fmt.Sprintf("\n  %v", mode)))
+			menuStringBuilder.WriteString(modeStyle.Render(fmt.Sprintf("\n  %v", mode.modeName)))
 		}
 
 	}

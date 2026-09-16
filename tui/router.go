@@ -23,7 +23,11 @@ type timeAttackTransitionMsg struct {
 type menuTransitionMsg struct{}
 
 type resultsTransitionMsg struct {
-	resultTime time.Duration
+	resultTime   time.Duration
+	correctWords int
+	wrongWords   int
+	totalChars   int
+	wrongChars   int
 }
 
 func signalMenuMsg() tea.Cmd {
@@ -39,10 +43,21 @@ func signalStartTimeAttack(timerDuration time.Duration) tea.Cmd {
 		}
 	}
 }
-func signalResultsMsg(resultTime time.Duration) tea.Cmd {
+func signalResultsMsg(m *timeAttackModel) tea.Cmd {
+	correctWordCount, wrongWordCount := 0, 0
+	for _, word := range m.finishedWordSlice {
+		if word.isCorrect {
+			correctWordCount++
+		} else {
+			wrongWordCount++
+		}
+	}
 	return func() tea.Msg {
 		return resultsTransitionMsg{
-			resultTime: resultTime,
+			correctWords: correctWordCount,
+			wrongWords:   wrongWordCount,
+			totalChars:   m.typedWords,
+			wrongChars:   m.mistakes,
 		}
 	}
 }
@@ -75,15 +90,12 @@ func (m routerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.currentState.Init()
 
 	case resultsTransitionMsg:
-		m.currentState = resultsModel{
-			resultTime: msg.resultTime,
-			resultsKeymap: resultsKeymap{
-				restart: key.NewBinding(
-					key.WithKeys("enter"),
-					key.WithHelp("Press enter to resume", "enter"),
-				),
-			},
-		}
+		m.currentState = CreateNewResultsModel(
+			msg.resultTime,
+			msg.correctWords,
+			msg.wrongWords,
+			msg.totalChars,
+			msg.wrongChars)
 		return m, m.currentState.Init()
 	case tea.KeyPressMsg:
 		switch {
