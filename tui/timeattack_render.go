@@ -56,11 +56,34 @@ func renderWords(m *typingEngine) string {
 	for i, word := range renderedWordsSlice {
 		if (i%20 == 0) && (i > 0) {
 			renderedWordsCombined.WriteString(word)
-			renderedWordsCombined.WriteString("\n")
+			renderedWordsCombined.WriteString("\n\n")
 		} else {
 			renderedWordsCombined.WriteString(word)
 			renderedWordsCombined.WriteString(" ")
 		}
+	}
+	return renderedWordsCombined.String()
+}
+
+func renderEndlessWords(m *typingEngine) string {
+	var renderedWordsCombined strings.Builder
+	var renderedWordsSlice []string
+	if !m.started {
+		//if not started, just render all as pending
+		renderedWordsSlice = renderPendingWords(m.wordSlice)
+	} else {
+		//render the word at current index
+		currWord := renderCurrWord(m.currentBuffer)
+		renderedWordsSlice = append(renderedWordsSlice, currWord)
+		//render all other pending words
+		if m.wordIndex < len(m.wordSlice)-1 {
+			pendingWords := m.wordSlice[m.wordIndex+1:]
+			renderedWordsSlice = append(renderedWordsSlice, renderPendingWords(pendingWords)...)
+		}
+	}
+	for _, word := range renderedWordsSlice {
+		renderedWordsCombined.WriteString(word)
+		renderedWordsCombined.WriteString(" ")
 	}
 	return renderedWordsCombined.String()
 }
@@ -79,7 +102,6 @@ func renderFinishedWords(wordSlice []detailedWord) []string {
 	for i := range len(wordSlice) {
 		finishedWord := renderFinishedWord(wordSlice[i])
 		renderedWordsSlice = append(renderedWordsSlice, finishedWord)
-
 	}
 	return renderedWordsSlice
 }

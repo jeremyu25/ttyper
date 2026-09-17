@@ -3,9 +3,11 @@ package tui
 import (
 	"time"
 
+	"charm.land/bubbles/v2/help"
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/timer"
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 )
 
 type timeAttackKeymap struct {
@@ -19,17 +21,7 @@ type timeAttackModel struct {
 	timeAttackKeymap timeAttackKeymap
 	timer            timer.Model
 	typingEngine     typingEngine
-}
-
-type typingEngine struct {
-	userInput         string
-	wordSlice         []string
-	finishedWordSlice []detailedWord
-	currentBuffer     detailedWord
-	started           bool
-	typedWords        int
-	mistakes          int
-	wordIndex         int
+	help             help.Model
 }
 
 func (m timeAttackModel) Init() tea.Cmd {
@@ -50,19 +42,11 @@ func (m timeAttackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	case timer.TimeoutMsg:
-		return m, signalResultsMsg(&m.typingEngine)
+		return m, signalResultsMsg(&m.typingEngine, timeAttackSeconds)
 
 	case tea.KeyPressMsg:
-		if !m.typingEngine.started {
-			buildInitialBuffer(&m.typingEngine)
-			if isAlphabetMsg(msg) {
-				addCharToBuffer(msg.Text, &m.typingEngine)
-				m.typingEngine.started = true
-			}
-			return m, m.timer.Init()
-		}
 		if m.typingEngine.wordIndex == len(m.typingEngine.wordSlice) {
-			return m, signalResultsMsg(&m.typingEngine)
+			return m, signalResultsMsg(&m.typingEngine, timeAttackSeconds)
 		}
 		switch {
 		case key.Matches(msg, m.timeAttackKeymap.back):
@@ -77,10 +61,18 @@ func (m timeAttackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if msg.Text != "" {
+			if !m.typingEngine.started {
+				buildInitialBuffer(&m.typingEngine)
+				if isAlphabetMsg(msg) {
+					addCharToBuffer(msg.Text, &m.typingEngine)
+					m.typingEngine.started = true
+				}
+				return m, m.timer.Init()
+			}
 			lastCorrect := addCharToBuffer(msg.Text, &m.typingEngine)
 			if lastCorrect && m.typingEngine.wordIndex == len(m.typingEngine.wordSlice)-1 {
 				commitWord(&m.typingEngine)
-				return m, signalResultsMsg(&m.typingEngine)
+				return m, signalResultsMsg(&m.typingEngine, timeAttackSeconds)
 			}
 			return m, nil
 		}
@@ -88,34 +80,51 @@ func (m timeAttackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m timeAttackModel) helpView() string {
+	return "\n\n" + m.help.ShortHelpView([]key.Binding{
+		m.timeAttackKeymap.back,
+		m.timeAttackKeymap.pause,
+		m.timeAttackKeymap.delete,
+	})
+}
+
 func (m timeAttackModel) View() tea.View {
-	s := m.timer.View()
+	s := m.timer.View() + "\n"
 	s += "\n" + renderWords(&m.typingEngine)
+	s += m.helpView()
 	timeAttackView := tea.NewView(s)
 	timeAttackView.AltScreen = true
 	return timeAttackView
 }
 
 func CreateNewTimeAttackModel(timerDuration time.Duration) tea.Model {
-	return timeAttackModel{
+	model := timeAttackModel{
 		timer: timer.New(timerDuration, timer.WithInterval(time.Millisecond)),
 		timeAttackKeymap: timeAttackKeymap{
 			pause: key.NewBinding(
 				key.WithKeys("esc"),
+				key.WithHelp("esc", "pause game"),
 			),
 			back: key.NewBinding(
 				key.WithKeys("shift+tab"),
+				key.WithHelp("shift+tab", "return to menu"),
 			),
 			delete: key.NewBinding(
 				key.WithKeys("backspace"),
+				key.WithHelp("backspace", "delete character"),
 			),
 			commit: key.NewBinding(
 				key.WithKeys("space"),
 			),
 		},
 		typingEngine: typingEngine{
-			wordSlice: buildsentence(),
+			wordSlice: buildsentence(timeAttackWords),
 			started:   false,
 		},
+		help: help.New(),
 	}
+	model.help.Styles.ShortKey = lipgloss.NewStyle().Foreground(lipgloss.Color("#8535fc")).Bold(true)
+	model.help.Styles.ShortDesc = lipgloss.NewStyle().Foreground(lipgloss.Color("#8535fc"))
+	model.help.Styles.ShortSeparator = lipgloss.NewStyle().Foreground(lipgloss.Color("#8535fc")).Faint(true)
+	return model
 }

@@ -27,6 +27,17 @@ type detailedWord struct {
 	characterIndex      int
 }
 
+type typingEngine struct {
+	userInput         string
+	wordSlice         []string
+	finishedWordSlice []detailedWord
+	currentBuffer     detailedWord
+	started           bool
+	typedWords        int
+	mistakes          int
+	wordIndex         int
+}
+
 func buildInitialBuffer(m *typingEngine) {
 	if m.wordIndex == len(m.wordSlice) {
 		return

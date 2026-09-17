@@ -20,6 +20,9 @@ type timeAttackTransitionMsg struct {
 	timerDuration time.Duration
 }
 
+type endlessTransitionMsg struct {
+}
+
 type menuTransitionMsg struct{}
 
 type resultsTransitionMsg struct {
@@ -43,7 +46,14 @@ func signalStartTimeAttack(timerDuration time.Duration) tea.Cmd {
 		}
 	}
 }
-func signalResultsMsg(m *typingEngine) tea.Cmd {
+
+func signalStartEndlessMsg() tea.Cmd {
+	return func() tea.Msg {
+		return endlessTransitionMsg{}
+	}
+}
+
+func signalResultsMsg(m *typingEngine, resultTime time.Duration) tea.Cmd {
 	correctWordCount, wrongWordCount := 0, 0
 	for _, word := range m.finishedWordSlice {
 		if word.isCorrect {
@@ -54,6 +64,7 @@ func signalResultsMsg(m *typingEngine) tea.Cmd {
 	}
 	return func() tea.Msg {
 		return resultsTransitionMsg{
+			resultTime:   resultTime,
 			correctWords: correctWordCount,
 			wrongWords:   wrongWordCount,
 			totalChars:   m.typedWords,
@@ -70,6 +81,9 @@ func (m routerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case timeAttackTransitionMsg:
 		m.currentState = CreateNewTimeAttackModel(msg.timerDuration)
+		return m, m.currentState.Init()
+	case endlessTransitionMsg:
+		m.currentState = CreateNewEndlessModel()
 		return m, m.currentState.Init()
 
 	case menuTransitionMsg:
@@ -105,7 +119,7 @@ func CreateNewRouterModel() tea.Model {
 		globalKeymap: globalKeymap{
 			quit: key.NewBinding(
 				key.WithKeys("ctrl+c"),
-				key.WithHelp("q", "quit"),
+				key.WithHelp("ctrl+c", "quit"),
 			),
 		},
 	}

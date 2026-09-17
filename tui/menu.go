@@ -3,15 +3,10 @@ package tui
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-)
-
-const (
-	timeAttackSeconds = time.Second * 60
 )
 
 type modeDescriptor struct {
@@ -54,7 +49,14 @@ func (m menuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.menuKeymap.start):
-			return m, signalStartTimeAttack(timeAttackSeconds)
+			switch m.cursor {
+			case 0:
+				return m, signalStartTimeAttack(timeAttackSeconds)
+			case 1:
+				return m, signalStartEndlessMsg()
+			default:
+				return m, nil
+			}
 		case key.Matches(msg, m.menuKeymap.down):
 			if m.cursor >= len(modes)-1 {
 				return m, nil
@@ -79,14 +81,15 @@ func (m menuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m menuModel) View() tea.View {
 	var menuStringBuilder strings.Builder
-	menuStringBuilder.WriteString(titleStyle.Render(`
-  ____________
+	menuStringBuilder.WriteString(titleStyle.Render(`  ____________
  /_  __/_  __/_  ______  ___  _____
   / /   / / / / / / __ \/ _ \/ ___/
  / /   / / / /_/ / /_/ /  __/ /
 /_/   /_/  \__, / .___/\___/_/
-          /____/_/                 `))
-	menuStringBuilder.WriteString(titleStyle.Render("\nWelcome to TTyper! Select a mode below to begin:"))
+          /____/_/
+
+          `))
+	menuStringBuilder.WriteString(titleStyle.Render("\nWelcome to TTyper! Select a mode below to begin:\n"))
 	for i, mode := range modes {
 		if m.cursor == i {
 			menuStringBuilder.WriteString(boldmodeStyle.Render(fmt.Sprintf("\n> %v: %v", mode.modeName, mode.description)))

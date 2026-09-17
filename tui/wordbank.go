@@ -5,9 +5,16 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
-func buildsentence() []string {
+const (
+	timeAttackSeconds = time.Second * 60
+	timeAttackWords   = 100
+	endlessWords      = 10
+)
+
+func buildsentence(wordsToGenerate int) []string {
 	path := filepath.Join("./wordbanks", "google-10000-english-usa-no-swears.txt")
 	absPath, err := filepath.Abs(path)
 	if err != nil {
@@ -20,7 +27,7 @@ func buildsentence() []string {
 	datString := strings.TrimSpace(string(dat))
 	stringSlice := strings.Fields(datString)
 	sentenceSlice := make([]string, 0)
-	for range 100 {
+	for range wordsToGenerate {
 		randIndex := rand.IntN(len(stringSlice) + 1)
 		sentenceSlice = append(sentenceSlice, stringSlice[randIndex])
 	}
