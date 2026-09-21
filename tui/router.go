@@ -143,6 +143,6 @@ func CreateNewRouterModel() tea.Model {
 				key.WithHelp("ctrl+c", "quit"),
 			),
 		},
-		selectedWordbank: "wordbanks/google-10000-english-usa-no-swears.txt",
+		selectedWordbank: "data/google-10000-english-usa-no-swears.txt",
 	}
 }
