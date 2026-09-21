@@ -30,12 +30,6 @@ func (m endlessModel) Init() tea.Cmd {
 
 func (m endlessModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-
-	case stopwatch.StartStopMsg:
-		var cmd tea.Cmd
-		m.stopwatch, cmd = m.stopwatch.Update(msg)
-		return m, cmd
-
 	case stopwatch.TickMsg:
 		var cmd tea.Cmd
 		m.stopwatch, cmd = m.stopwatch.Update(msg)

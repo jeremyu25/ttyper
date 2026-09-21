@@ -11,7 +11,6 @@ import (
 )
 
 type timeAttackKeymap struct {
-	pause  key.Binding
 	back   key.Binding
 	delete key.Binding
 	commit key.Binding
@@ -30,12 +29,6 @@ func (m timeAttackModel) Init() tea.Cmd {
 
 func (m timeAttackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-
-	case timer.StartStopMsg:
-		var cmd tea.Cmd
-		m.timer, cmd = m.timer.Update(msg)
-		return m, cmd
-
 	case timer.TickMsg:
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
@@ -51,8 +44,6 @@ func (m timeAttackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, m.timeAttackKeymap.back):
 			return m, signalMenuMsg()
-		case key.Matches(msg, m.timeAttackKeymap.pause):
-			return m, m.timer.Toggle()
 		case key.Matches(msg, m.timeAttackKeymap.delete):
 			deleteChar(&m.typingEngine)
 			return m, nil
@@ -83,7 +74,6 @@ func (m timeAttackModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m timeAttackModel) helpView() string {
 	return "\n\n" + m.help.ShortHelpView([]key.Binding{
 		m.timeAttackKeymap.back,
-		m.timeAttackKeymap.pause,
 		m.timeAttackKeymap.delete,
 	})
 }
@@ -101,10 +91,6 @@ func CreateNewTimeAttackModel(timerDuration time.Duration) tea.Model {
 	model := timeAttackModel{
 		timer: timer.New(timerDuration, timer.WithInterval(time.Millisecond)),
 		timeAttackKeymap: timeAttackKeymap{
-			pause: key.NewBinding(
-				key.WithKeys("esc"),
-				key.WithHelp("esc", "pause game"),
-			),
 			back: key.NewBinding(
 				key.WithKeys("shift+tab"),
 				key.WithHelp("shift+tab", "return to menu"),
