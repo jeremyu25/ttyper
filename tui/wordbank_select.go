@@ -1,14 +1,13 @@
 package tui
 
 import (
-	"embed"
-	"io/fs"
 	"math/rand/v2"
 	"strings"
 	"time"
 
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
+	"github.com/jeremyu25/ttyper/wordbanks"
 )
 
 const (
@@ -16,9 +15,6 @@ const (
 	timeAttackWords   = 100
 	endlessWords      = 10
 )
-
-//go:embed wordbanks/*.txt
-var wordbankFS embed.FS
 
 type changeWordbankMsg struct {
 	wordbank string
@@ -103,7 +99,7 @@ func CreateNewWordbankModel() (tea.Model, error) {
 			),
 		},
 	}
-	wordbanks, err := getAllFilenames(&wordbankFS)
+	wordbanks, err := wordbanks.GetAllFilenames()
 	if err != nil {
 		return nil, err
 	}
@@ -111,33 +107,12 @@ func CreateNewWordbankModel() (tea.Model, error) {
 	return model, nil
 }
 
-func buildsentence(wordsToGenerate int, selectedWordbank string) []string {
-	dat, err := wordbankFS.ReadFile(selectedWordbank)
-	if err != nil {
-		panic(err)
-	}
-	datString := strings.TrimSpace(string(dat))
-	stringSlice := strings.Fields(datString)
+func randomPickWords(wordsToGenerate int, selectedWordbank string) []string {
+	stringSlice := wordbanks.CreateWordSlice(selectedWordbank)
 	sentenceSlice := make([]string, 0)
 	for range wordsToGenerate {
 		randIndex := rand.IntN(len(stringSlice))
 		sentenceSlice = append(sentenceSlice, stringSlice[randIndex])
 	}
 	return sentenceSlice
-}
-
-func getAllFilenames(efs *embed.FS) (files []string, err error) {
-	if err := fs.WalkDir(efs, ".", func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() {
-			return nil
-		}
-
-		files = append(files, path)
-
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	return files, nil
 }

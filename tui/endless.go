@@ -61,7 +61,7 @@ func (m endlessModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			lastCorrect := addCharToBuffer(msg.Text, &m.typingEngine)
 			if lastCorrect && m.typingEngine.wordIndex == len(m.typingEngine.wordSlice)-1 {
 				commitWord(&m.typingEngine)
-				m.typingEngine.wordSlice = buildsentence(endlessWords, m.selectedWordbank)
+				m.typingEngine.wordSlice = randomPickWords(endlessWords, m.selectedWordbank)
 				m.typingEngine.wordIndex = 0
 				//we need to rebuild the buffer after resetting the words for endless
 				buildInitialBuffer(&m.typingEngine)
@@ -109,7 +109,7 @@ func CreateNewEndlessModel(selectedWordbank string) tea.Model {
 			),
 		},
 		typingEngine: typingEngine{
-			wordSlice: buildsentence(endlessWords, selectedWordbank),
+			wordSlice: randomPickWords(endlessWords, selectedWordbank),
 			started:   false,
 		},
 		help:             help.New(),

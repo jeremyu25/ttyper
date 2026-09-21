@@ -105,7 +105,7 @@ func CreateNewTimeAttackModel(timerDuration time.Duration, selectedWordbank stri
 			),
 		},
 		typingEngine: typingEngine{
-			wordSlice: buildsentence(timeAttackWords, selectedWordbank),
+			wordSlice: randomPickWords(timeAttackWords, selectedWordbank),
 			started:   false,
 		},
 		help:             help.New(),
