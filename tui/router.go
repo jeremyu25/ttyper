@@ -8,8 +8,9 @@ import (
 )
 
 type routerModel struct {
-	globalKeymap globalKeymap
-	currentState tea.Model
+	globalKeymap     globalKeymap
+	currentState     tea.Model
+	selectedWordbank string
 }
 
 type globalKeymap struct {
@@ -25,12 +26,20 @@ type endlessTransitionMsg struct {
 
 type menuTransitionMsg struct{}
 
+type wordbankSelectTransitionMsg struct{}
+
 type resultsTransitionMsg struct {
 	resultTime   time.Duration
 	correctWords int
 	wrongWords   int
 	totalChars   int
 	wrongChars   int
+}
+
+func signalWordbankMsg() tea.Cmd {
+	return func() tea.Msg {
+		return wordbankSelectTransitionMsg{}
+	}
 }
 
 func signalMenuMsg() tea.Cmd {
@@ -80,10 +89,11 @@ func (m routerModel) Init() tea.Cmd {
 func (m routerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case timeAttackTransitionMsg:
-		m.currentState = CreateNewTimeAttackModel(msg.timerDuration)
+		m.currentState = CreateNewTimeAttackModel(msg.timerDuration, m.selectedWordbank)
 		return m, m.currentState.Init()
+
 	case endlessTransitionMsg:
-		m.currentState = CreateNewEndlessModel()
+		m.currentState = CreateNewEndlessModel(m.selectedWordbank)
 		return m, m.currentState.Init()
 
 	case menuTransitionMsg:
@@ -98,6 +108,17 @@ func (m routerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			msg.totalChars,
 			msg.wrongChars)
 		return m, m.currentState.Init()
+
+	case wordbankSelectTransitionMsg:
+		var err error
+		m.currentState, err = CreateNewWordbankModel()
+		if err != nil {
+			panic(err)
+		}
+		return m, nil
+	case changeWordbankMsg:
+		m.selectedWordbank = msg.wordbank
+		return m, nil
 	case tea.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.globalKeymap.quit):
@@ -122,5 +143,6 @@ func CreateNewRouterModel() tea.Model {
 				key.WithHelp("ctrl+c", "quit"),
 			),
 		},
+		selectedWordbank: "wordbanks/google-10000-english-usa-no-swears.txt",
 	}
 }

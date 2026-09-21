@@ -18,10 +18,11 @@ type endlessKeymap struct {
 }
 
 type endlessModel struct {
-	endlessKeymap endlessKeymap
-	stopwatch     stopwatch.Model
-	typingEngine  typingEngine
-	help          help.Model
+	endlessKeymap    endlessKeymap
+	stopwatch        stopwatch.Model
+	typingEngine     typingEngine
+	help             help.Model
+	selectedWordbank string
 }
 
 func (m endlessModel) Init() tea.Cmd {
@@ -60,7 +61,7 @@ func (m endlessModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			lastCorrect := addCharToBuffer(msg.Text, &m.typingEngine)
 			if lastCorrect && m.typingEngine.wordIndex == len(m.typingEngine.wordSlice)-1 {
 				commitWord(&m.typingEngine)
-				m.typingEngine.wordSlice = buildsentence(endlessWords)
+				m.typingEngine.wordSlice = buildsentence(endlessWords, m.selectedWordbank)
 				m.typingEngine.wordIndex = 0
 				//we need to rebuild the buffer after resetting the words for endless
 				buildInitialBuffer(&m.typingEngine)
@@ -88,7 +89,7 @@ func (m endlessModel) View() tea.View {
 	return endlessView
 }
 
-func CreateNewEndlessModel() tea.Model {
+func CreateNewEndlessModel(selectedWordbank string) tea.Model {
 	model := endlessModel{
 		stopwatch: stopwatch.New(stopwatch.WithInterval(time.Millisecond)),
 		endlessKeymap: endlessKeymap{
@@ -108,10 +109,11 @@ func CreateNewEndlessModel() tea.Model {
 			),
 		},
 		typingEngine: typingEngine{
-			wordSlice: buildsentence(endlessWords),
+			wordSlice: buildsentence(endlessWords, selectedWordbank),
 			started:   false,
 		},
-		help: help.New(),
+		help:             help.New(),
+		selectedWordbank: selectedWordbank,
 	}
 	model.help.Styles.ShortKey = lipgloss.NewStyle().Foreground(lipgloss.Color("#8535fc")).Bold(true)
 	model.help.Styles.ShortDesc = lipgloss.NewStyle().Foreground(lipgloss.Color("#8535fc"))

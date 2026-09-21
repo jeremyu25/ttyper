@@ -25,6 +25,10 @@ var (
 		{
 			modeName:    "Endless",
 			description: "Type out as many words as you can until you get bored."},
+		{
+			modeName:    "Change Wordbank",
+			description: "Select the wordbank you would like to use.",
+		},
 	}
 )
 
@@ -54,6 +58,8 @@ func (m menuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, signalStartTimeAttack(timeAttackSeconds)
 			case 1:
 				return m, signalStartEndlessMsg()
+			case 2:
+				return m, signalWordbankMsg()
 			default:
 				return m, nil
 			}

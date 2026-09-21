@@ -21,6 +21,7 @@ type timeAttackModel struct {
 	timer            timer.Model
 	typingEngine     typingEngine
 	help             help.Model
+	selectedWordbank string
 }
 
 func (m timeAttackModel) Init() tea.Cmd {
@@ -87,7 +88,7 @@ func (m timeAttackModel) View() tea.View {
 	return timeAttackView
 }
 
-func CreateNewTimeAttackModel(timerDuration time.Duration) tea.Model {
+func CreateNewTimeAttackModel(timerDuration time.Duration, selectedWordbank string) tea.Model {
 	model := timeAttackModel{
 		timer: timer.New(timerDuration, timer.WithInterval(time.Millisecond)),
 		timeAttackKeymap: timeAttackKeymap{
@@ -104,10 +105,11 @@ func CreateNewTimeAttackModel(timerDuration time.Duration) tea.Model {
 			),
 		},
 		typingEngine: typingEngine{
-			wordSlice: buildsentence(timeAttackWords),
+			wordSlice: buildsentence(timeAttackWords, selectedWordbank),
 			started:   false,
 		},
-		help: help.New(),
+		help:             help.New(),
+		selectedWordbank: selectedWordbank,
 	}
 	model.help.Styles.ShortKey = lipgloss.NewStyle().Foreground(lipgloss.Color("#8535fc")).Bold(true)
 	model.help.Styles.ShortDesc = lipgloss.NewStyle().Foreground(lipgloss.Color("#8535fc"))
